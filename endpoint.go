@@ -1,9 +1,7 @@
 package tackle
 
 import (
-	"errors"
 	"github.com/go-kit/kit/endpoint"
-	"reflect"
 )
 
 type EndpointFactory interface {
@@ -12,10 +10,13 @@ type EndpointFactory interface {
 }
 
 type endpointFactory struct {
+	DynamicCaller
 }
 
 func NewEndpointFactory() EndpointFactory {
-	return endpointFactory{}
+	return endpointFactory{
+		DynamicCaller: NewDynamicCaller(),
+	}
 }
 
 func (ef endpointFactory) Generate(end string) (endpoint.Endpoint, error) {
@@ -23,19 +24,6 @@ func (ef endpointFactory) Generate(end string) (endpoint.Endpoint, error) {
 }
 
 func (ef endpointFactory) GenerateWithInstance(class interface{}, end string) (endpoint.Endpoint, error) {
-	var factoryPoint endpoint.Endpoint
-
-	e := reflect.ValueOf(class)
-	m := e.MethodByName(end)
-
-	if !m.IsValid() {
-		return factoryPoint, errors.New("endpoint not found")
-	}
-
-	var in []reflect.Value
-	out := m.Call(in)
-
-	factoryPoint = out[0].Interface().(endpoint.Endpoint)
-
-	return factoryPoint, nil
+	result, err := ef.Call(class, end)
+	return result.(endpoint.Endpoint), err
 }
