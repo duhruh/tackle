@@ -16,11 +16,20 @@ type HttpTransport interface {
 
 
 
-func NewServer(end endpoint.Endpoint, serializer Serializer, options []http3.ServerOption) *http3.Server{
+//func NewServer(end endpoint.Endpoint, serializer Serializer, options []http3.ServerOption) *http3.Server{
+//	return http3.NewServer(
+//		end,
+//		serializer.Deserialize(),
+//		serializer.Serialize(),
+//		options...,
+//	)
+//}
+
+func NewServer(end endpoint.Endpoint, encoder Encoder, options []http3.ServerOption) *http3.Server{
 	return http3.NewServer(
 		end,
-		serializer.Deserialize(),
-		serializer.Serialize(),
+		encoder.Decode(),
+		encoder.Encode(),
 		options...,
 	)
 }
