@@ -4,7 +4,10 @@ import (
 	"net/http"
 	//"github.com/duhruh/tackle"
 	//http2 "github.com/duhruh/scaffold/app/hello/transport/http"
-	//http3 "github.com/go-kit/kit/transport/http"
+	http3 "github.com/go-kit/kit/transport/http"
+	//"github.com/duhruh/tackle"
+	//"golang.org/x/net/http2"
+	"github.com/go-kit/kit/endpoint"
 )
 
 type HttpTransport interface {
@@ -13,8 +16,11 @@ type HttpTransport interface {
 
 
 
-//func NewServer(end string, ef tackle.EndpointFactory, serializer http2.HttpSerializer, options ...http3.ServerOption){
-//	callPoint := end + "Endpoint"
-//	deserializer := end + "Request"
-//	serialize := end + "Response"
-//}
+func NewServer(end endpoint.Endpoint, serializer Serializer, options []http3.ServerOption) *http3.Server{
+	return http3.NewServer(
+		end,
+		serializer.Deserialize(),
+		serializer.Serialize(),
+		options...,
+	)
+}

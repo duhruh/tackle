@@ -1,5 +1,8 @@
 package tackle
 
-type ApplicationError interface {
-	Error() error
+type ApplicationError struct {
+	Err error `json:"error,omitempty"`
 }
+
+
+func (ae ApplicationError) Error() error { println("fdsf"); return ae.Err }
