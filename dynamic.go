@@ -9,8 +9,7 @@ type DynamicCaller interface {
 	Call(class interface{}, end string, args ...interface{}) (interface{}, error)
 }
 
-type dynamicCaller struct {
-}
+type dynamicCaller struct {}
 
 func NewDynamicCaller() DynamicCaller {
 	return dynamicCaller{}
