@@ -1,6 +1,7 @@
 package task
 
 import (
+	"bytes"
 	"io"
 	"strings"
 )
@@ -59,6 +60,10 @@ func (r *runner) Run(args []string) {
 
 	for _, arg := range args[2:] {
 		if strings.HasPrefix(arg, "--") {
+			if r.isHelp(arg) {
+				r.showCommandHelp(task)
+				return
+			}
 
 			r.populateOption(arg, task)
 			continue
@@ -68,6 +73,33 @@ func (r *runner) Run(args []string) {
 	}
 
 	task.Run(r.writer)
+}
+
+func (r *runner) isHelp(arg string) bool {
+	return strings.Contains(arg, "help")
+}
+
+func (r *runner) showCommandHelp(task Task) {
+	var fullHelp bytes.Buffer
+
+	fullHelp.WriteString("command: " + task.Name() + "\n")
+	fullHelp.WriteString("\t" + task.Description() + "\n")
+
+	if len(task.Options()) > 0 {
+		fullHelp.WriteString("options\n")
+		for _, opt := range task.Options() {
+			fullHelp.WriteString("\t" + opt.Key() + " - " + opt.Description() + "\n")
+		}
+	}
+
+	if len(task.Arguments()) > 0 {
+		fullHelp.WriteString("arguments\n")
+		for _, arg := range task.Arguments() {
+			fullHelp.WriteString("\t" + arg.Key() + " - " + arg.Description() + "\n")
+		}
+	}
+
+	r.writer.Write(fullHelp.Bytes())
 }
 
 func (r *runner) populateArgument(raw string, task Task) {
