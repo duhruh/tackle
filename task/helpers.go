@@ -1,10 +1,15 @@
 package task
 
-import "errors"
+import (
+	"bytes"
+	"errors"
+	"io"
+)
 
 type Helpers interface {
 	GetArgument(args []Argument, key string) (Argument, error)
 	GetOption(opts []Option, key string) (Option, error)
+	Say(w io.Writer, str string)
 }
 
 type helpers struct{}
@@ -33,4 +38,10 @@ func (h helpers) GetOption(opts []Option, key string) (Option, error) {
 
 	var c CommandLineArgument
 	return c, errors.New("option not found")
+}
+
+func (h helpers) Say(w io.Writer, str string) {
+	var sentence bytes.Buffer
+	sentence.WriteString(str + "\n")
+	w.Write(sentence.Bytes())
 }

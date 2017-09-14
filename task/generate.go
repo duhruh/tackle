@@ -2,7 +2,6 @@ package task
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -73,7 +72,7 @@ func (t GenerateTask) Run(w io.Writer) {
 	}
 
 	fullPath := filepath.Join(dir, newTask.Package, fileName)
-	fmt.Println(fullPath)
+	t.Say(w, "task created at: "+fullPath)
 
 	file, err := os.OpenFile(fullPath, os.O_WRONLY|os.O_CREATE, 0666)
 	defer file.Close()

@@ -27,14 +27,17 @@ func NewRunner(writer io.Writer, opts ...interface{}) Runner {
 	return r
 }
 
+// Register a new task to be run
 func (r *runner) Register(task Task) {
 	r.tasks[task.Name()] = task
 }
 
+// Sets the task to run by default
 func (r *runner) SetDefaultTask(task Task) {
 	r.defaultTask = task
 }
 
+// Returns a list of all the tasks currently registered
 func (r *runner) Tasks() []Task {
 	var values []Task
 	for _, val := range r.tasks {
@@ -43,6 +46,7 @@ func (r *runner) Tasks() []Task {
 	return values
 }
 
+// Kicks off the task runner
 func (r *runner) Run(args []string) {
 	if len(args) == 1 {
 		r.defaultTask.Run(r.writer)
@@ -75,10 +79,12 @@ func (r *runner) Run(args []string) {
 	task.Run(r.writer)
 }
 
+// Simple check to see if the argument is the help option
 func (r *runner) isHelp(arg string) bool {
 	return strings.Contains(arg, "help")
 }
 
+// Prints out the complete help for a give task
 func (r *runner) showCommandHelp(task Task) {
 	var fullHelp bytes.Buffer
 
@@ -102,6 +108,7 @@ func (r *runner) showCommandHelp(task Task) {
 	r.writer.Write(fullHelp.Bytes())
 }
 
+// Adds the given raw argument to the running list of found arguments
 func (r *runner) populateArgument(raw string, task Task) {
 	for _, arg := range task.Arguments() {
 		if _, ok := r.foundArguments[arg.Key()]; ok {
