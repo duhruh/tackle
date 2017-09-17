@@ -41,7 +41,5 @@ func (h helpers) GetOption(opts []Option, key string) (Option, error) {
 }
 
 func (h helpers) Say(w io.Writer, str string) {
-	var sentence bytes.Buffer
-	sentence.WriteString(str + "\n")
-	w.Write(sentence.Bytes())
+	w.Write(bytes.NewBufferString(str + "\n").Bytes())
 }
