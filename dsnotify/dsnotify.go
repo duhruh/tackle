@@ -10,7 +10,6 @@ import (
 
 type DirectoryFunc func(*fsnotify.Event, error)
 
-
 type DirectoryWatcher interface {
 	AddDirectory(dir string) error
 	FsWatcher() *fsnotify.Watcher
@@ -19,6 +18,7 @@ type DirectoryWatcher interface {
 	ErrorsChannel() chan error
 	DirectoryEvents() DirectoryEvents
 	Watch(fun DirectoryFunc)
+	IgnoreRegex(rgx *regexp.Regexp)
 }
 
 type DirectoryEvents interface {
@@ -46,6 +46,7 @@ func (de directoryEvents) ErrorsChannel() chan error {
 type directoryWatcher struct {
 	*fsnotify.Watcher
 	fileRegexes     []*regexp.Regexp
+	ignoreRegex     []*regexp.Regexp
 	events          chan fsnotify.Event
 	errors          chan error
 	directoryEvents DirectoryEvents
@@ -61,6 +62,10 @@ func NewDirectoryWatcher() (DirectoryWatcher, error) {
 		errors:          errChan,
 		directoryEvents: newDirectoryEvents(event, errChan),
 	}, err
+}
+
+func (dw *directoryWatcher) IgnoreRegex(rgx *regexp.Regexp) {
+	dw.ignoreRegex = append(dw.ignoreRegex, rgx)
 }
 
 func (dw *directoryWatcher) AddDirectory(dir string) error {
@@ -95,7 +100,20 @@ func (dw *directoryWatcher) walkDirectory(path string, info os.FileInfo, err err
 		return nil
 	}
 
+	if dw.matchesIgnore(path) {
+		return nil
+	}
+
 	return dw.Watcher.Add(path)
+}
+func (dw *directoryWatcher) matchesIgnore(name string) bool {
+	for _, rgx := range dw.ignoreRegex {
+		if rgx.MatchString(name) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (dw *directoryWatcher) matchesAny(name string) bool {
@@ -110,20 +128,16 @@ func (dw *directoryWatcher) matchesAny(name string) bool {
 
 func (dw *directoryWatcher) Watch(fun DirectoryFunc) {
 	for {
-
+		print(".")
 		select {
 		case ev := <-dw.Events:
 			if ev.Op&fsnotify.Remove == fsnotify.Remove || ev.Op&fsnotify.Write == fsnotify.Write || ev.Op&fsnotify.Create == fsnotify.Create {
-				println(ev.Name)
-				//base := filepath.Base(ev.Name)
 
-				// Assume it is a directory and track it.
-				//if *flag_recursive == true && !flag_excludedDirs.Matches(ev.Name) {
-				//	dw.Watcher.Add(ev.Name)
-				//}
+				if dw.matchesIgnore(ev.Name) {
+					continue
+				}
 
 				if dw.matchesAny(ev.Name) {
-					println("it matched something")
 					fun(&ev, nil)
 				}
 			}
