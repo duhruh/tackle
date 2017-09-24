@@ -8,6 +8,7 @@ import (
 
 type HttpTransport interface {
 	NewHandler(m *http.ServeMux) http.Handler
+	Routes() []Route
 }
 
 func NewServer(end endpoint.Endpoint, encoder Encoder, options []http3.ServerOption) *http3.Server {
