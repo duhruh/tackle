@@ -1,4 +1,4 @@
-package tackle
+package generic
 
 import (
 	"errors"

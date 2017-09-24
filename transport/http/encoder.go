@@ -1,7 +1,7 @@
 package http
 
 import (
-	"github.com/duhruh/tackle"
+	"github.com/duhruh/tackle/generic"
 	"github.com/go-kit/kit/transport/http"
 )
 
@@ -32,12 +32,12 @@ type EncoderFactory interface {
 }
 
 type encoderFactory struct {
-	tackle.DynamicCaller
+	generic.DynamicCaller
 }
 
 func NewEncoderFactory() EncoderFactory {
 	return encoderFactory{
-		DynamicCaller: tackle.NewDynamicCaller(),
+		DynamicCaller: generic.NewDynamicCaller(),
 	}
 }
 
