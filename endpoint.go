@@ -1,6 +1,7 @@
 package tackle
 
 import (
+	"github.com/duhruh/tackle/generic"
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -10,12 +11,12 @@ type EndpointFactory interface {
 }
 
 type endpointFactory struct {
-	DynamicCaller
+	generic.DynamicCaller
 }
 
 func NewEndpointFactory() EndpointFactory {
 	return endpointFactory{
-		DynamicCaller: NewDynamicCaller(),
+		DynamicCaller: generic.NewDynamicCaller(),
 	}
 }
 
