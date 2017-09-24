@@ -19,6 +19,7 @@ type DirectoryWatcher interface {
 	DirectoryEvents() DirectoryEvents
 	Watch(fun DirectoryFunc)
 	IgnoreRegex(rgx *regexp.Regexp)
+	Close() error
 }
 
 type DirectoryEvents interface {
@@ -124,6 +125,10 @@ func (dw *directoryWatcher) matchesAny(name string) bool {
 	}
 
 	return false
+}
+
+func (dw *directoryWatcher) Close() error {
+	return dw.Watcher.Close()
 }
 
 func (dw *directoryWatcher) Watch(fun DirectoryFunc) {
