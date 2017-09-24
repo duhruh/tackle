@@ -128,7 +128,6 @@ func (dw *directoryWatcher) matchesAny(name string) bool {
 
 func (dw *directoryWatcher) Watch(fun DirectoryFunc) {
 	for {
-		print(".")
 		select {
 		case ev := <-dw.Events:
 			if ev.Op&fsnotify.Remove == fsnotify.Remove || ev.Op&fsnotify.Write == fsnotify.Write || ev.Op&fsnotify.Create == fsnotify.Create {
@@ -136,6 +135,8 @@ func (dw *directoryWatcher) Watch(fun DirectoryFunc) {
 				if dw.matchesIgnore(ev.Name) {
 					continue
 				}
+
+				dw.Watcher.Add(ev.Name)
 
 				if dw.matchesAny(ev.Name) {
 					fun(&ev, nil)
