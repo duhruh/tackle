@@ -7,4 +7,5 @@ type Config interface {
 	GrpcBindAddress() string
 	LogOption() level.Option
 	Environment() Environment
+	DatabaseConnection() map[string]string
 }
