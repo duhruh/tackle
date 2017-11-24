@@ -6,6 +6,19 @@ import (
 	"strings"
 )
 
+const (
+	helpOption       = "help"
+	optionPrefix     = "--"
+	optionAssignment = "="
+
+	optionText   = "options"
+	commandText  = "commands"
+	argumentText = "arguments"
+
+	newline = "\n"
+	tab     = "\t"
+)
+
 type Runner interface {
 	Register(task Task)
 	Run(args []string)
@@ -54,16 +67,15 @@ func (r *runner) Run(args []string) {
 	}
 
 	command := args[1]
-
 	task, ok := r.tasks[command]
-
 	if !ok {
 		r.defaultTask.Run(r.writer)
 		return
 	}
 
-	for _, arg := range args[2:] {
-		if strings.HasPrefix(arg, "--") {
+	commandArgs := args[2:]
+	for _, arg := range commandArgs {
+		if r.isOption(arg) {
 			if r.isHelp(arg) {
 				r.showCommandHelp(task)
 				return
@@ -81,28 +93,28 @@ func (r *runner) Run(args []string) {
 
 // Simple check to see if the argument is the help option
 func (r *runner) isHelp(arg string) bool {
-	return strings.Contains(arg, "help")
+	return strings.Contains(arg, helpOption)
+}
+
+func (r *runner) isOption(arg string) bool {
+	return strings.HasPrefix(arg, optionPrefix)
 }
 
 // Prints out the complete help for a give task
 func (r *runner) showCommandHelp(task Task) {
 	var fullHelp bytes.Buffer
 
-	fullHelp.WriteString("command: " + task.Name() + "\n")
-	fullHelp.WriteString("\t" + task.Description() + "\n")
+	fullHelp.WriteString(commandText + ": " + task.Name() + newline)
+	fullHelp.WriteString(tab + task.Description() + newline)
 
 	if len(task.Options()) > 0 {
-		fullHelp.WriteString("options\n")
-		for _, opt := range task.Options() {
-			fullHelp.WriteString("\t" + opt.Key() + " - " + opt.Description() + "\n")
-		}
+		fullHelp.WriteString(optionText + newline)
+		fullHelp = r.formatCommandLine(fullHelp, task.OptionsToCommandLine())
 	}
 
 	if len(task.Arguments()) > 0 {
-		fullHelp.WriteString("arguments\n")
-		for _, arg := range task.Arguments() {
-			fullHelp.WriteString("\t" + arg.Key() + " - " + arg.Description() + "\n")
-		}
+		fullHelp.WriteString(argumentText + newline)
+		fullHelp = r.formatCommandLine(fullHelp, task.ArgumentsToCommandLine())
 	}
 
 	r.writer.Write(fullHelp.Bytes())
@@ -122,12 +134,19 @@ func (r *runner) populateArgument(raw string, task Task) {
 }
 
 func (r *runner) populateOption(raw string, task Task) {
-	parts := strings.SplitN(raw, "=", 2)
-	option := strings.TrimPrefix(parts[0], "--")
+	parts := strings.SplitN(raw, optionAssignment, 2)
+	option := strings.TrimPrefix(parts[0], optionPrefix)
 	for _, opt := range task.Options() {
 		if opt.Key() == option {
 			opt.SetValue(parts[1])
 			break
 		}
 	}
+}
+
+func (r *runner) formatCommandLine(buf bytes.Buffer, cmd []CommandLineArgument) bytes.Buffer {
+	for _, arg := range cmd {
+		buf.WriteString(tab + arg.Key() + " - " + arg.Description() + newline)
+	}
+	return buf
 }

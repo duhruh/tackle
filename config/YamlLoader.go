@@ -1,21 +1,21 @@
 package config
 
 import (
-	//"fmt"
-	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"os"
-	//"reflect"
+
+	"gopkg.in/yaml.v2"
 )
 
 type YamlLoader interface {
+	Loader
 }
 
 type yamlLoader struct {
 }
 
-func NewYamlLoader() Loader {
+func NewYamlLoader() YamlLoader {
 	return yamlLoader{}
 }
 
@@ -26,35 +26,34 @@ func (y yamlLoader) LoadFromFile(reader io.Reader) (Config, error) {
 		return config, err
 	}
 
-	options := loadYamlFromData([]byte(data))
+	options := y.loadYamlFromData([]byte(data))
 	config = NewConfig(options)
 
 	return config, nil
 }
 
-func loadYamlFromData(data []byte) OptionMap {
+func (y yamlLoader) loadYamlFromData(data []byte) OptionMap {
 	m := make(map[interface{}]interface{})
 	err := yaml.Unmarshal([]byte(data), &m)
 	if err != nil {
 		panic(err)
 	}
 
-	return resolveMap(m)
+	return y.resolveMap(m)
 }
-func resolveMap(m map[interface{}]interface{}) OptionMap {
+func (y yamlLoader) resolveMap(m map[interface{}]interface{}) OptionMap {
 	var uhh []Option
 
-	//println("=======")
 	for k, v := range m {
 
 		if k.(string) == "include>" {
-			om := loadFile(v.(string))
+			om := y.loadFile(v.(string))
 			uhh = append(uhh, om.All()...)
 			continue
 		}
-		//println(k.(string))
+
 		o := NewOption(k.(string))
-		o.SetValue(resolveType(v))
+		o.SetValue(y.resolveType(v))
 
 		uhh = append(uhh, o)
 	}
@@ -62,7 +61,7 @@ func resolveMap(m map[interface{}]interface{}) OptionMap {
 	return NewOptionMap(uhh)
 }
 
-func loadFile(f string) OptionMap {
+func (y yamlLoader) loadFile(f string) OptionMap {
 	ff, err := os.Open(f)
 	if err != nil {
 		panic(err)
@@ -72,25 +71,24 @@ func loadFile(f string) OptionMap {
 		panic(err)
 	}
 
-	return loadYamlFromData([]byte(data))
+	return y.loadYamlFromData([]byte(data))
 }
 
-func resolveType(v interface{}) interface{} {
-	//fmt.Println(reflect.TypeOf(v))
+func (y yamlLoader) resolveType(v interface{}) interface{} {
 	switch v.(type) {
 	case []interface{}:
-		return resolveArrayThings(v.([]interface{}))
+		return y.resolveArrayThings(v.([]interface{}))
 	case map[interface{}]interface{}:
-		return resolveMap(v.(map[interface{}]interface{}))
+		return y.resolveMap(v.(map[interface{}]interface{}))
 	default:
 		return v
 	}
 }
 
-func resolveArrayThings(v []interface{}) []interface{} {
+func (y yamlLoader) resolveArrayThings(v []interface{}) []interface{} {
 	var arr []interface{}
 	for _, uh := range v {
-		arr = append(arr, resolveType(uh))
+		arr = append(arr, y.resolveType(uh))
 	}
 	return arr
 }
