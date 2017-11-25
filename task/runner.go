@@ -109,12 +109,12 @@ func (r *runner) showCommandHelp(task Task) {
 
 	if len(task.Options()) > 0 {
 		fullHelp.WriteString(optionText + newline)
-		fullHelp = r.formatCommandLine(fullHelp, task.OptionsToCommandLine())
+		fullHelp = r.formatCommandLine(fullHelp, r.optionsToCommandLine(task.Options()))
 	}
 
 	if len(task.Arguments()) > 0 {
 		fullHelp.WriteString(argumentText + newline)
-		fullHelp = r.formatCommandLine(fullHelp, task.ArgumentsToCommandLine())
+		fullHelp = r.formatCommandLine(fullHelp, r.argumentsToCommandLine(task.Arguments()))
 	}
 
 	r.writer.Write(fullHelp.Bytes())
@@ -149,4 +149,22 @@ func (r *runner) formatCommandLine(buf bytes.Buffer, cmd []CommandLineArgument) 
 		buf.WriteString(tab + arg.Key() + " - " + arg.Description() + newline)
 	}
 	return buf
+}
+
+func (r *runner) argumentsToCommandLine(args []Argument) []CommandLineArgument {
+	var cmd []CommandLineArgument
+	for _, c := range args {
+		cmd = append(cmd, CommandLineArgument(c))
+	}
+
+	return cmd
+}
+
+func (r *runner) optionsToCommandLine(opts []Option) []CommandLineArgument {
+	var cmd []CommandLineArgument
+	for _, c := range opts {
+		cmd = append(cmd, CommandLineArgument(c))
+	}
+
+	return cmd
 }
