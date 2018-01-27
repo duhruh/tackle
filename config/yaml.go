@@ -46,7 +46,7 @@ func (y yamlLoader) resolveMap(m map[interface{}]interface{}) OptionMap {
 
 	for k, v := range m {
 
-		if k.(string) == "include=" {
+		if k.(string) == "_include" {
 			om := y.loadFile(v.(string))
 			uhh = append(uhh, om.All()...)
 			continue
