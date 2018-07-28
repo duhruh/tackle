@@ -1,10 +1,13 @@
 package http
 
 import (
+	"net/http"
+
 	"github.com/go-kit/kit/endpoint"
 	http3 "github.com/go-kit/kit/transport/http"
-	"net/http"
 )
+
+// type TackleResponse func(ctx context.Context, w http.ResponseWriter, response Packet) error
 
 type HttpTransport interface {
 	NewHandler(m *http.ServeMux) http.Handler

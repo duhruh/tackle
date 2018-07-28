@@ -1,7 +1,7 @@
 package grpc
 
 import (
-	"github.com/duhruh/tackle/generic"
+	"github.com/duhruh/wiki/lib/tackle/generic"
 	"github.com/go-kit/kit/transport/grpc"
 )
 

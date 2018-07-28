@@ -1,8 +1,8 @@
 package tackle
 
 import (
-	"github.com/duhruh/tackle/transport/grpc"
-	"github.com/duhruh/tackle/transport/http"
+	"github.com/duhruh/wiki/lib/tackle/transport/grpc"
+	"github.com/duhruh/wiki/lib/tackle/transport/http"
 )
 
 type Application interface {

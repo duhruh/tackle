@@ -120,7 +120,7 @@ import (
 	"io"
 	"bytes"
 
-	"github.com/duhruh/tackle/task"
+	"github.com/duhruh/wiki/lib/tackle/task"
 )
 
 type {{.Name}}Task struct {

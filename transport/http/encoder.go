@@ -1,9 +1,14 @@
 package http
 
 import (
-	"github.com/duhruh/tackle/generic"
 	"github.com/go-kit/kit/transport/http"
 )
+
+// EncoderCaller -
+type EncoderCaller func() Encoder
+
+// EncoderMap -
+type EncoderMap map[string]EncoderCaller
 
 type Encoder interface {
 	Encode() http.EncodeResponseFunc
@@ -27,27 +32,6 @@ func (e encoder) Decode() http.DecodeRequestFunc  { return e.decode }
 
 type EncoderFactory interface {
 	Generate(end string) (Encoder, error)
-	GenerateWithInstance(class interface{}, end string) (Encoder, error)
 	ErrorEncoder() http.ErrorEncoder
-}
-
-type encoderFactory struct {
-	generic.DynamicCaller
-}
-
-func NewEncoderFactory() EncoderFactory {
-	return encoderFactory{
-		DynamicCaller: generic.NewDynamicCaller(),
-	}
-}
-
-func (ef encoderFactory) ErrorEncoder() http.ErrorEncoder { return nil }
-
-func (ef encoderFactory) Generate(end string) (Encoder, error) {
-	return ef.GenerateWithInstance(ef, end)
-}
-
-func (ef encoderFactory) GenerateWithInstance(class interface{}, end string) (Encoder, error) {
-	result, err := ef.Call(class, end)
-	return result.(Encoder), err
+	SetEncoders(EncoderMap)
 }
