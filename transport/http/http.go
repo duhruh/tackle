@@ -1,8 +1,10 @@
 package http
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/duhruh/wiki/lib/tackle/transport"
 	"github.com/go-kit/kit/endpoint"
 	http3 "github.com/go-kit/kit/transport/http"
 )
@@ -10,7 +12,7 @@ import (
 // type TackleResponse func(ctx context.Context, w http.ResponseWriter, response Packet) error
 
 type HttpTransport interface {
-	NewHandler(m *http.ServeMux) http.Handler
+	NewHandler(m *http.ServeMux, options []http3.ServerOption) http.Handler
 	Routes() []Route
 }
 
@@ -22,3 +24,6 @@ func NewServer(end endpoint.Endpoint, encoder Encoder, options []http3.ServerOpt
 		options...,
 	)
 }
+
+// TackleResponse  -
+type TackleResponse func(ctx context.Context, w http.ResponseWriter, response transport.Packet) error
